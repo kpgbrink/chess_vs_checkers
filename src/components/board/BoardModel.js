@@ -1,4 +1,5 @@
-
+const friendSymbol = Symbol('friend');
+const foeSymbol = Symbol('foe');
 
 export default class BoardModel {
   constructor() {
@@ -28,13 +29,12 @@ export default class BoardModel {
 
   getSimplifiedBoard() {
     return this.locations.map(row => (
-        row.map(tile => {
-          if (tile) {
-            if (tile.team === 'checker') {
-              return 'checker';
-            } else if (tile.team === 'chess') {
-              return 'chess';
+        row.map(piece => {
+          if (piece) {
+            if (piece.team === this.teamTurn) {
+              return friendSymbol;
             }
+            return foeSymbol;
           }
           return null;
         })
@@ -52,7 +52,7 @@ export default class BoardModel {
     } else if (this.pieceSelected) {
       console.log('check if this is a place you can move to if it is move else do nothing');
       // the piece won't move if not possible
-      if (this.pieceSelected.checkIfMoveable(this.piecePos, {row:row, col:col}, this.getSimplifiedBoard())) {
+      if (this.pieceSelected.checkIfMoveable(this.piecePos, {row:row, col:col}, this)) {
         // move the piece if it was moved
         this.locations[row][col] = this.locations[this.piecePos.row][this.piecePos.col];
         this.locations[this.piecePos.row][this.piecePos.col] = null;
@@ -84,14 +84,12 @@ class BoardPiece {
   }
 
   getMoveableSpots(posFrom, board) {
-    console.error('you must override getMoveableSpots()');
-    return [];
+    throw new Error('you must override getMoveableSpots()');
   }
 
   checkIfMoveable(posFrom, posTo, board) {
-    return this.getMoveableSpots(posFrom, board).find(spot => posTo.row === spot.row && posTo.col === spot.col);
+    return this.getMoveableSpots(posFrom, board.getSimplifiedBoard()).find(spot => posTo.row === spot.row && posTo.col === spot.col);
   }
-
 }
 
 class CheckerPiece extends BoardPiece {
