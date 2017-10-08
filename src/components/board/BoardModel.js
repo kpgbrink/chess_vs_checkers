@@ -104,18 +104,23 @@ class CheckerPiece extends BoardPiece {
     console.log('board', board);
     const moveableSpaces = [];
     // normal movement
-    const checkNormal = function (row, col) {
+    const checkNormal = function (rowDelta, colDelta) {
+      const row = posFrom.row + rowDelta;
+      const col = posFrom.col + colDelta;
       if (board[row] && board[row][col] === null) {
         moveableSpaces.push({row: row, col: col})
       }
     }
-    checkNormal(posFrom.row+1, posFrom.col+1);
-    checkNormal(posFrom.row+1, posFrom.col-1);
-    checkNormal(posFrom.row+1, posFrom.col);
-    if (this.king) {
-      checkNormal(posFrom.row-1, posFrom.col+1);
-      checkNormal(posFrom.row-1, posFrom.col-1);
-    }
+    const deltas = [
+      [1, 1],
+      [1, -1],
+      // Illegal but just here for now
+      [1, 0],
+    ].concat(this.king ? [
+      [-1, 1],
+      [-1, -1],
+    ] : []);
+    deltas.forEach(pair => checkNormal(pair[0], pair[1]));
     console.log('moveableSpaces', moveableSpaces);
     return moveableSpaces;
   }
@@ -135,5 +140,4 @@ class ChessPiece extends BoardPiece {
   constructor(team) {
     super(team);
   }
-
 }
