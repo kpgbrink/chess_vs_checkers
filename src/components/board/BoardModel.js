@@ -140,4 +140,167 @@ class ChessPiece extends BoardPiece {
   constructor(team) {
     super(team);
   }
+
+  /**
+   * A move is considered valid if it would hit a foe or be an empty spot.
+   */
+   moveTargetIsValid(board, pos, moveType=null) {
+    const [
+      row,
+      col
+    ] = pos;
+    const piece = board[row][col];
+    if (piece === null || piece.team !== board.teamTurn) {
+      if (!moveType) {
+        return true;
+      } else if (moveType === 'attack') {
+        return piece !== null;
+      } else if (moveType === 'empty') {
+        return piece.team !== board.teamTurn;
+      }
+    }
+    return false;
+  }
+}
+
+class SimpleChessPiece extends ChessPiece {
+  constructor(team, moveDeltas) {
+    super(team);
+    this.moveDeltas = moveDeltas;
+  }
+
+  getMoveableSpots(posFrom, board) {
+    return [].concat.apply([], this.moveDeltas.map(moveDelta => {
+      const moveRowDelta = moveDelta[0];
+      const moveColDelta = moveDelta[1];
+      const moveType = moveDelta[2];
+      if (typeof moveRowDelta !== 'number' || typeof moveColDelta !== 'number') {
+        throw new Error('Invalid move delta');
+      }
+      const moveToRow = moveRowDelta + posFrom.row;
+      const moveToCol = moveColDelta + posFrom.col;
+      const validMoves = [];
+      if (this.moveTargetIsValid(board, [moveToRow, moveToCol], moveType)) {
+        validMoves.push({row: moveToRow, col: moveToCol});
+      }
+      return validMoves;
+    }))
+  }
+}
+
+class SlidingChessPiece extends ChessPiece {
+  constructor(team, slideDeltas) {
+    super(team);
+    this.slideDeltas = slideDeltas;
+  }
+
+  getMoveableSpots(posFrom, board) {
+    return [].concat.apply([], this.slideDeltas.map(slideDelta => {
+      const slideRowDelta = slideDelta[0];
+      const slideColDelta = slideDelta[1];
+      if (typeof slideRowDelta !== 'number' || typeof slideColDelta !== 'number') {
+        throw new Error(`Invalid slideDelta!`);
+      }
+      let i = posFrom.row;
+      let j = posFrom.col;
+      const validMoves = [];
+      while (i < 8 && i > -1 && j < 8 && j > -1) {
+          i += slideRowDelta;
+          j += slideColDelta;
+          if (!this.moveTargetIsValid(board, [i, j])) {
+            break;
+          }
+          validMoves.push({
+            row: i,
+            col: j,
+          });
+          // If we hit an enemy, stop.
+          if (board[i][j]) {
+            break;
+          }
+      }
+      return validMoves;
+    }));
+  }
+}
+
+class KingChessPiece extends SimpleChessPiece {
+  constructor(team) {
+    const moveableSpots = [];
+    for (let i = -1; i<2; i++) {
+      for (let j= -1; j<2; j++) {
+        if (i !== 0 && j !==0) {
+          moveableSpots.push([i,j]);
+        }
+      }
+    }
+    super(team, moveableSpots);
+    this.image = 'KingChessPiece.png';
+  }
+}
+
+class PawnChessPiece extends SimpleChessPiece {
+  constructor(team) {
+    super(team, [
+      [-1,0,'empty'],
+      [-1,1,'attack'],
+      [1,1,'attack']
+    ]);
+    this.image = 'PawnChessPiece.png';
+  }
+}
+
+class KnightChessPiece extends SimpleChessPiece {
+  constructor(team) {
+    super(team, [
+      [2,1],
+      [2,-1],
+      [1,2],
+      [1,-2],
+      [-2,1],
+      [-2,-1],
+      [-1,2],
+      [-1,-2],
+    ]);
+    this.image = 'KnightChessPiece.png';
+  }
+}
+
+class RookChessPiece extends SlidingChessPiece {
+  constructor(team) {
+    super(team, [
+      [0, 1],
+      [0, -1],
+      [1, 0],
+      [-1, 0],
+    ]);
+    this.image = 'RookChessPiece.png';
+  }
+}
+
+class QueenChessPiece extends SlidingChessPiece {
+  constructor(team) {
+    const moveableSpots = [];
+    for (let i = -1; i<2; i++) {
+      for (let j= -1; j<2; j++) {
+        if (i !== 0 && j !==0) {
+          moveableSpots.push([i,j]);
+        }
+      }
+    }
+    super(team, moveableSpots);
+    this.image = 'QueenChessPiece.png';
+  }
+}
+
+class BishopChessPiece extends SlidingChessPiece {
+  constructor(team) {
+    super(team, [
+      [1, 1],
+      [-1, 1],
+      [1, -1],
+      [-1, -1],
+    ]);
+    this.image = 'BishopChessPiece.png';
+  }
 }

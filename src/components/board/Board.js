@@ -76,7 +76,7 @@ export default class Board extends Component {
               style={{...styles.tile,
                 backgroundImage: backgroundImage
                 }}
-                >{this.state.board[i][j] && <img style={styles.piece} src={process.env.PUBLIC_URL + `/${this.state.board[i][j].image}`} alt='checker piece'/>} </td>
+                >{this.state.board[i][j] && <img style={styles.piece} src={process.env.PUBLIC_URL + `/${this.state.board[i][j].image}`} alt={this.state.board[i][j].image}/>} </td>
             }
           )}</tr>
         )}
