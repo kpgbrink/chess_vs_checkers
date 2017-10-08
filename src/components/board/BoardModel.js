@@ -10,7 +10,7 @@ export default class BoardModel {
     this.teamTurn = 'checker';
     this.locations = [];
     this.pieceSelected = false;
-    this.moveableSpaces = null;
+    this.moveableSpaces = [];
     this.piecePos = null;
     for (let row=0; row<8; row++) {
       const rowObj = this.locations[row] = [];
@@ -58,6 +58,7 @@ export default class BoardModel {
         this.locations[this.piecePos.row][this.piecePos.col] = null;
         // switch turn.
         //this.teamTurn = this.teamTurn === 'checkers' ? 'chess' : 'checkers';
+        this.moveableSpaces = [];
       }
     } else {
       console.log('nothing should happen here', this.locations[row][col]);
@@ -112,6 +113,7 @@ class CheckerPiece extends BoardPiece {
     }
     checkNormal(posFrom.row+1, posFrom.col+1);
     checkNormal(posFrom.row+1, posFrom.col-1);
+    checkNormal(posFrom.row+1, posFrom.col);
     if (this.king) {
       checkNormal(posFrom.row-1, posFrom.col+1);
       checkNormal(posFrom.row-1, posFrom.col-1);
@@ -120,6 +122,15 @@ class CheckerPiece extends BoardPiece {
     return moveableSpaces;
   }
 
+  checkIfMoveable(posFrom, posTo, board) {
+    const moveable = super.checkIfMoveable(posFrom, posTo, board);
+    // logic for making someone a king.
+    if (moveable && posTo.row === 7) {
+      this.king = true;
+      this.image = 'CheckerKingPiece.png';
+    }
+    return moveable;
+  }
 }
 
 class ChessPiece extends BoardPiece {
