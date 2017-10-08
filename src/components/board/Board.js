@@ -20,6 +20,10 @@ const styles = {
   tile: {
     height: '9vh',
     width: '9vh',
+  },
+  piece: {
+    height: '95%',
+    width: '95%',
   }
 };
 
@@ -33,13 +37,21 @@ export default class Board extends Component {
     this.board = new BoardModel();
     this.state = {
       board: this.board.getState(),
-
+      moveableSpaces: [],
     };
+  }
+
+  getBoardState() {
+    this.setState({
+      board: this.board.getState(),
+      moveableSpaces: this.board.getMoveableSpaces(),
+    });
   }
 
   handleCellClick(row, col) {
     console.log('cells clicked');
     this.board.click(row, col);
+    this.getBoardState();
   }
 
   render() {
@@ -58,7 +70,7 @@ export default class Board extends Component {
               onClick={() => this.handleCellClick(i, j)}
               style={{...styles.tile,
                 backgroundImage: 'url(' + process.env.PUBLIC_URL + ((i + j) % 2 === 0 ? '/LightTile.png': 'DarkTile.png') + ')'}}
-                ></td>
+                >{this.state.board[i][j] && <img style={styles.piece} src={process.env.PUBLIC_URL + `/${this.state.board[i][j].image}`} alt='checker piece'/>} </td>
           )}</tr>
         )}
       </tbody>

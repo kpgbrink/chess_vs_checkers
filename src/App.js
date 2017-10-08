@@ -13,7 +13,7 @@ const styles = {
     backgroundColor: '#C4C2A3',
     display: 'flex',
     height: '15%',
-    fontSize: '80%',
+    fontSize: '4vh',
   },
   gameTable: {
     backgroundColor: '#341301',
@@ -22,16 +22,20 @@ const styles = {
     height: '90%'
   },
   newGameButton: {
-    height: '40px',
-    margin: '20px',
+    fontSize: '3vh',
+    height: '2.2vh',
+    paddingBottom: '4vh',
+    margin: '2vh',
   },
   logoStyle: {
-    height: '150px',
+    height: '30vh',
+    zIndex: '1000',
   },
   DeadZones: {
+    fontSize: '4vh',
     height: '90%',
-    widght: '25%',
-    margin: '4px',
+    widght: '50%',
+    margin: '10px',
   },
   Board: {
 
