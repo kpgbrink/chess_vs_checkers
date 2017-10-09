@@ -20,6 +20,20 @@ export default class BoardModel {
           // add checker piece
           console.log('placed it');
           rowObj[col] = new CheckerPiece('checker');
+        } else if (row === 6) {
+          rowObj[col] = null; //new PawnChessPiece('chess');
+        } else if (row === 7) {
+          if (col === 0 || col === 7) {
+            rowObj[col] = new RookChessPiece('chess');
+          } else if (col === 1 || col === 6) {
+            rowObj[col] = new KnightChessPiece('chess');
+          } else if (col === 2 || col === 5) {
+            rowObj[col] = new BishopChessPiece('chess');
+          } else if (col === 3) {
+            rowObj[col] = new QueenChessPiece('chess');
+          } else if(col === 4) {
+            rowObj[col] = new KingChessPiece('chess');
+          }
         } else {
           rowObj[col] = null;
         }
@@ -42,6 +56,7 @@ export default class BoardModel {
   }
 
   click(row, col) {
+    console.log('current turn', this.teamTurn);
     console.log('row', row, 'col', col);
     const piece = this.locations[row][col];
     if (piece && piece.team === this.teamTurn) {
@@ -57,8 +72,9 @@ export default class BoardModel {
         this.locations[row][col] = this.locations[this.piecePos.row][this.piecePos.col];
         this.locations[this.piecePos.row][this.piecePos.col] = null;
         // switch turn.
-        //this.teamTurn = this.teamTurn === 'checkers' ? 'chess' : 'checkers';
+        this.teamTurn = (this.teamTurn === 'checker' ? 'chess' : 'checker');
         this.moveableSpaces = [];
+        this.pieceSelected = null;
       }
     } else {
       console.log('nothing should happen here', this.locations[row][col]);
@@ -149,6 +165,9 @@ class ChessPiece extends BoardPiece {
       row,
       col
     ] = pos;
+    if (!board[row] || !board[row][col]) {
+      return false;
+    }
     const piece = board[row][col];
     if (piece === null || piece.team !== board.teamTurn) {
       if (!moveType) {
@@ -156,7 +175,7 @@ class ChessPiece extends BoardPiece {
       } else if (moveType === 'attack') {
         return piece !== null;
       } else if (moveType === 'empty') {
-        return piece.team !== board.teamTurn;
+        return piece && piece.team !== board.teamTurn;
       }
     }
     return false;
