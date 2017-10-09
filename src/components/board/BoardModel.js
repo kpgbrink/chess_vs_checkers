@@ -62,12 +62,12 @@ export default class BoardModel {
     if (piece && piece.team === this.teamTurn) {
       console.log('your piece now');
       this.pieceSelected = piece;
-      this.piecePos = {row: row, col: col};
-      this.moveableSpaces = piece.getMoveableSpots({row: row, col:col}, this);
+      this.piecePos = {row, col};
+      this.moveableSpaces = piece.getMoveableSpots({row, col}, this);
     } else if (this.pieceSelected) {
       console.log('check if this is a place you can move to if it is move else do nothing');
       // the piece won't move if not possible
-      if (this.pieceSelected.checkIfMoveable(this.piecePos, {row:row, col:col}, this)) {
+      if (this.pieceSelected.checkIfMoveable(this.piecePos, {row, col}, this)) {
         // move the piece if it was moved
         this.locations[row][col] = this.locations[this.piecePos.row][this.piecePos.col];
         this.locations[this.piecePos.row][this.piecePos.col] = null;
@@ -161,7 +161,7 @@ class ChessPiece extends BoardPiece {
   /**
    * A move is considered valid if it would hit a foe or be an empty spot.
    */
-   moveTargetIsValid(board, pos, moveType=null) {
+   moveTargetIsValid(board, pos, moveType=['empty', 'attack']) {
      console.log('checking if valid');
      const simpleBoard = board.getSimplifiedBoard();
     const [
@@ -173,20 +173,10 @@ class ChessPiece extends BoardPiece {
       return false;
     }
     const piece = simpleBoard[row][col];
-    if (piece === null || piece.team !== board.teamTurn) {
-      if (!moveType) {
-        console.log('this move type is the one I am doing');
-        return true;
-      } else if (moveType === 'attack') {
-        return piece !== null;
-      } else if (moveType === 'empty') {
-        return piece && piece.team !== simpleBoard.teamTurn;
-      }
-    }
-
-    console.log('team', piece.team, simpleBoard.teamTurn);
-    console.log('returning false');
-    return false;
+    return false
+      || piece === null && moveType.indexOf('empty') !== -1
+      || piece && piece.team !== board.teamTurn && moveType.indexOf('attack') !== -1
+    ;
   }
 }
 
@@ -256,7 +246,7 @@ class KingChessPiece extends SimpleChessPiece {
     const moveableSpots = [];
     for (let i = -1; i<2; i++) {
       for (let j= -1; j<2; j++) {
-        if (i !== 0 && j !==0) {
+        if (i !== 0 || j !==0) {
           moveableSpots.push([i,j]);
         }
       }
@@ -269,11 +259,21 @@ class KingChessPiece extends SimpleChessPiece {
 class PawnChessPiece extends SimpleChessPiece {
   constructor(team) {
     super(team, [
-      [-1,0,'empty'],
-      [-1,-1,'attack'],
-      [-1,1,'attack']
+      [-1,0,['empty']],
+      [-1,-1,['attack']],
+      [-1,1,['attack']]
     ]);
     this.image = 'PawnChessPiece.png';
+  }
+
+  checkIfMoveable(posFrom, posTo, board) {
+    if (!super.checkIfMoveable.apply(this, arguments)) {
+      return false;
+    }
+    if (posTo.row === 0) {
+      board.locations[posFrom.row][posFrom.col] = new QueenChessPiece(this.team);
+    }
+    return true;
   }
 }
 
@@ -309,8 +309,8 @@ class QueenChessPiece extends SlidingChessPiece {
   constructor(team) {
     const moveableSpots = [];
     for (let i = -1; i<2; i++) {
-      for (let j= -1; j<2; j++) {
-        if (i !== 0 && j !==0) {
+      for (let j = -1; j<2; j++) {
+        if (i !== 0 || j !== 0) {
           moveableSpots.push([i,j]);
         }
       }
