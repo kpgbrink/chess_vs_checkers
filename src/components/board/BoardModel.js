@@ -21,7 +21,7 @@ export default class BoardModel {
           console.log('placed it');
           rowObj[col] = new CheckerPiece('checker');
         } else if (row === 6) {
-          rowObj[col] = null; //new PawnChessPiece('chess');
+          rowObj[col] = new PawnChessPiece('chess');
         } else if (row === 7) {
           if (col === 0 || col === 7) {
             rowObj[col] = new RookChessPiece('chess');
@@ -63,7 +63,7 @@ export default class BoardModel {
       console.log('your piece now');
       this.pieceSelected = piece;
       this.piecePos = {row: row, col: col};
-      this.moveableSpaces = piece.getMoveableSpots({row: row, col:col}, this.getSimplifiedBoard());
+      this.moveableSpaces = piece.getMoveableSpots({row: row, col:col}, this);
     } else if (this.pieceSelected) {
       console.log('check if this is a place you can move to if it is move else do nothing');
       // the piece won't move if not possible
@@ -104,7 +104,7 @@ class BoardPiece {
   }
 
   checkIfMoveable(posFrom, posTo, board) {
-    return this.getMoveableSpots(posFrom, board.getSimplifiedBoard()).find(spot => posTo.row === spot.row && posTo.col === spot.col);
+    return this.getMoveableSpots(posFrom, board).find(spot => posTo.row === spot.row && posTo.col === spot.col);
   }
 }
 
@@ -118,6 +118,7 @@ class CheckerPiece extends BoardPiece {
   getMoveableSpots(posFrom, board) {
     // for checkers if king then going down.
     console.log('board', board);
+    board = board.getSimplifiedBoard();
     const moveableSpaces = [];
     // normal movement
     const checkNormal = function (rowDelta, colDelta) {
@@ -161,23 +162,30 @@ class ChessPiece extends BoardPiece {
    * A move is considered valid if it would hit a foe or be an empty spot.
    */
    moveTargetIsValid(board, pos, moveType=null) {
+     console.log('checking if valid');
+     const simpleBoard = board.getSimplifiedBoard();
     const [
       row,
       col
     ] = pos;
-    if (!board[row] || !board[row][col]) {
+    if (!simpleBoard[row] || simpleBoard[row][col] === undefined) {
+      console.log('simpleBoard not there');
       return false;
     }
-    const piece = board[row][col];
+    const piece = simpleBoard[row][col];
     if (piece === null || piece.team !== board.teamTurn) {
       if (!moveType) {
+        console.log('this move type is the one I am doing');
         return true;
       } else if (moveType === 'attack') {
         return piece !== null;
       } else if (moveType === 'empty') {
-        return piece && piece.team !== board.teamTurn;
+        return piece && piece.team !== simpleBoard.teamTurn;
       }
     }
+
+    console.log('team', piece.team, simpleBoard.teamTurn);
+    console.log('returning false');
     return false;
   }
 }
@@ -234,7 +242,7 @@ class SlidingChessPiece extends ChessPiece {
             col: j,
           });
           // If we hit an enemy, stop.
-          if (board[i][j]) {
+          if (board.getSimplifiedBoard()[i][j]) {
             break;
           }
       }
@@ -262,8 +270,8 @@ class PawnChessPiece extends SimpleChessPiece {
   constructor(team) {
     super(team, [
       [-1,0,'empty'],
-      [-1,1,'attack'],
-      [1,1,'attack']
+      [-1,-1,'attack'],
+      [-1,1,'attack']
     ]);
     this.image = 'PawnChessPiece.png';
   }
