@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import Tile from './Tile';
 import BoardModel from './BoardModel';
 
 const styles = {
@@ -52,9 +51,9 @@ export default class Board extends Component {
   }
 
   render() {
-    const {
-      style
-    } = this.props;
+    // const {
+    //   style
+    // } = this.props;
     const state = this.state;
     console.log(state.moveableSpaces.find(spot => 0 === spot.row && 1 === spot.col));
 

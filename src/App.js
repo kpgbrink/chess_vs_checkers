@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
 import Board from './components/board/Board';
 import DeadZones from './components/board/DeadZones';
 import WhoseTurn from './components/board/WhoseTurn';

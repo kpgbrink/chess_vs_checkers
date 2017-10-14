@@ -1,14 +1,14 @@
 import React, { Component } from 'react';
 
-const styles = {
-  header: {
-    display: 'flex',
-
-  },
-  logoStyle: {
-    width: '200px',
-  },
-};
+// const styles = {
+//   header: {
+//     display: 'flex',
+//
+//   },
+//   logoStyle: {
+//     width: '200px',
+//   },
+// };
 
 export default class WhoseTurn extends Component {
   constructor(props) {
