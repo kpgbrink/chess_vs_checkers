@@ -139,6 +139,20 @@ class CheckerPiece extends BoardPiece {
     ] : []);
     deltas.forEach(pair => checkNormal(pair[0], pair[1]));
     console.log('moveableSpaces', moveableSpaces);
+
+    const checkIfAttackable = function(posFrom, delta) {
+      // First check if applying 1 * delta has enemy
+
+      // Then check if applying 2 * delta has empty space
+
+    }
+
+    // attack movement
+    const checkAttack = function (posFrom) {
+      const simpleBoard = board.getSimplifiedBoard();
+      //if (simpleBoard[posFrom])
+    }
+
     return moveableSpaces;
   }
 
@@ -168,6 +182,7 @@ class ChessPiece extends BoardPiece {
       row,
       col
     ] = pos;
+    // if out of board
     if (!simpleBoard[row] || simpleBoard[row][col] === undefined) {
       console.log('simpleBoard not there');
       return false;
@@ -176,9 +191,11 @@ class ChessPiece extends BoardPiece {
     if (piece) {
       console.log('board teamate?', piece, board.teamTurn);
     }
+  //  console.log('simpleBoard =', simpleBoard);
+    console.log(pos, (piece === null && moveType.indexOf('empty') !== -1), (piece && piece !== friendSymbol && moveType.indexOf('attack') !== -1));
     return false
-      || piece === null && moveType.indexOf('empty') !== -1
-      || piece && piece !== friendSymbol && moveType.indexOf('attack') !== -1;
+      || (piece === null && moveType.indexOf('empty') !== -1)
+      || (piece && piece !== friendSymbol && moveType.indexOf('attack') !== -1);
   }
 }
 
@@ -199,7 +216,7 @@ class SimpleChessPiece extends ChessPiece {
       const moveToRow = moveRowDelta + posFrom.row;
       const moveToCol = moveColDelta + posFrom.col;
       const validMoves = [];
-      if (this.moveTargetIsValid(board, [moveToRow, moveToCol], ["empty"])) {
+      if (this.moveTargetIsValid(board, [moveToRow, moveToCol], moveType)) {
         validMoves.push({row: moveToRow, col: moveToCol});
       }
       return validMoves;
@@ -260,13 +277,11 @@ class KingChessPiece extends SimpleChessPiece {
 
 class PawnChessPiece extends SimpleChessPiece {
   constructor(team) {
-    const normalMovement = [
+    super(team, [
       [-1,0,['empty']],
       [-1,-1,['attack']],
       [-1,1,['attack']]
-    ];
-    super(team, normalMovement);
-    this.normalMovement = normalMovement;
+    ]);
     this.image = 'PawnChessPiece.png';
   }
 
