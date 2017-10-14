@@ -173,10 +173,12 @@ class ChessPiece extends BoardPiece {
       return false;
     }
     const piece = simpleBoard[row][col];
+    if (piece) {
+      console.log('board teamate?', piece, board.teamTurn);
+    }
     return false
       || piece === null && moveType.indexOf('empty') !== -1
-      || piece && piece.team !== board.teamTurn && moveType.indexOf('attack') !== -1
-    ;
+      || piece && piece !== friendSymbol && moveType.indexOf('attack') !== -1;
   }
 }
 
@@ -197,7 +199,7 @@ class SimpleChessPiece extends ChessPiece {
       const moveToRow = moveRowDelta + posFrom.row;
       const moveToCol = moveColDelta + posFrom.col;
       const validMoves = [];
-      if (this.moveTargetIsValid(board, [moveToRow, moveToCol], moveType)) {
+      if (this.moveTargetIsValid(board, [moveToRow, moveToCol], ["empty"])) {
         validMoves.push({row: moveToRow, col: moveToCol});
       }
       return validMoves;
@@ -258,11 +260,13 @@ class KingChessPiece extends SimpleChessPiece {
 
 class PawnChessPiece extends SimpleChessPiece {
   constructor(team) {
-    super(team, [
+    const normalMovement = [
       [-1,0,['empty']],
       [-1,-1,['attack']],
       [-1,1,['attack']]
-    ]);
+    ];
+    super(team, normalMovement);
+    this.normalMovement = normalMovement;
     this.image = 'PawnChessPiece.png';
   }
 
@@ -270,10 +274,29 @@ class PawnChessPiece extends SimpleChessPiece {
     if (!super.checkIfMoveable.apply(this, arguments)) {
       return false;
     }
+    // Turn into a queen when get to end.
     if (posTo.row === 0) {
       board.locations[posFrom.row][posFrom.col] = new QueenChessPiece(this.team);
     }
+
     return true;
+  }
+
+  getMoveableSpots(posFrom, board) {
+    if (posFrom.row === 6) {
+      // can move two spaces?
+      const moveableSpots = super.getMoveableSpots.apply(this, arguments);
+      // check if spot before is moveable.
+      if (moveableSpots.find(pos => pos.row === posFrom.row-1 && pos.col === posFrom.col)) {
+        const moveTwoRows = {row: posFrom.row-2, col: posFrom.col};
+        if (this.moveTargetIsValid(board, [moveTwoRows.row, moveTwoRows.col], ["empty"])) {
+          moveableSpots.push(moveTwoRows);
+        }
+      }
+      return moveableSpots;
+    } else {
+      return super.getMoveableSpots.apply(this, arguments);
+    }
   }
 }
 
