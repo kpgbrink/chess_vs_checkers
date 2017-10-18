@@ -113,18 +113,19 @@ class CheckerPiece extends BoardPiece {
     super(team);
     this.king = false;
     this.image = 'CheckerPiece.png';
+    this.attackSpots = [];
   }
 
   getMoveableSpots(posFrom, board) {
+    const simpleBoard = board.getSimplifiedBoard();
     // for checkers if king then going down.
     console.log('board', board);
-    board = board.getSimplifiedBoard();
     const moveableSpaces = [];
     // normal movement
     const checkNormal = function (rowDelta, colDelta) {
       const row = posFrom.row + rowDelta;
       const col = posFrom.col + colDelta;
-      if (board[row] && board[row][col] === null) {
+      if (simpleBoard[row] && simpleBoard[row][col] === null) {
         moveableSpaces.push({row: row, col: col})
       }
     }
@@ -140,17 +141,32 @@ class CheckerPiece extends BoardPiece {
     deltas.forEach(pair => checkNormal(pair[0], pair[1]));
     console.log('moveableSpaces', moveableSpaces);
 
+    this.attackSpots = [];
     const checkIfAttackable = function(posFrom, delta) {
+      // simpleBoard
       // First check if applying 1 * delta has enemy
-
+      const spotFoe = {row: posFrom.row+delta.row, col: posFrom.col+delta.col};
+      const spotEmpty = {row: posFrom.row+delta.row*2, col: posFrom.col+delta.col*2};
+      if (simpleBoard[spotFoe.row] && simpleBoard[spotFoe.row][spotFoe.col] === foeSymbol &&
+      simpleBoard[spotEmpty.row] && simpleBoard[spotEmpty.row][spotEmpty.col] === null) {
+        this.attackSpots.push(spotFoe);
+        moveableSpaces.push(spotEmpty);
+        return true;
+      }
       // Then check if applying 2 * delta has empty space
-
+      return false;
     }
-
     // attack movement
     const checkAttack = function (posFrom) {
-      const simpleBoard = board.getSimplifiedBoard();
       //if (simpleBoard[posFrom])
+      const delta1 = {row: 1, col: -1};
+      const delta2 = {row: 1, col: 1};
+      if (checkIfAttackable(posFrom, delta1)) {
+        checkAttack({row: posFrom.row+delta1.row, col: posFrom.col+delta1.col});
+      }
+      if (checkIfAttackable(posFrom, delta2)) {
+        checkAttack({row: posFrom.row+delta1.row, col: posFrom.col+delta1.col});
+      }
     }
 
     return moveableSpaces;
