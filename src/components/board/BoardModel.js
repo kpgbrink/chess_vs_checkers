@@ -13,7 +13,7 @@ export default class BoardModel {
     this.pieceSelected = false;
     this.moveableSpaces = [];
     this.piecePos = null;
-    this.switchTurn = true;
+    this.activePiece = null;
     for (let row=0; row<8; row++) {
       const rowObj = this.locations[row] = [];
       for (let col=0; col<8; col++) {
@@ -57,6 +57,12 @@ export default class BoardModel {
   }
 
   click(row, col) {
+    if (this.activePiece) {
+      if (!this.moveableSpaces.find(space => space.row === row && space.col === col)) {
+        return;
+        alert(`you can't do it`);
+      }
+    }
     console.log('current turn', this.teamTurn);
     console.log('row', row, 'col', col);
     const piece = this.locations[row][col];
@@ -73,13 +79,14 @@ export default class BoardModel {
         this.locations[row][col] = this.locations[this.piecePos.row][this.piecePos.col];
         this.locations[this.piecePos.row][this.piecePos.col] = null;
         // switch turn.
-        if (this.switchTurn) {
+        if (!this.activePiece) {
           this.teamTurn = (this.teamTurn === 'checker' ? 'chess' : 'checker');
+          this.moveableSpaces = [];
+          this.pieceSelected = null;
         } else {
-          this.switchTurn = true;
+          this.moveableSpaces = this.locations[row][col].checkAttack(this.activePiece, this.getSimplifiedBoard());
+          this.piecePos = {row, col};
         }
-        this.moveableSpaces = [];
-        this.pieceSelected = null;
       }
     } else {
       console.log('nothing should happen here', this.locations[row][col]);
@@ -118,62 +125,57 @@ class CheckerPiece extends BoardPiece {
     super(team);
     this.king = false;
     this.image = 'CheckerPiece.png';
-    this.attackSpots = [];
+    this.moveableSpaces = [];
+    this.deltas = [
+      [1, 1],
+      [1, -1],
+    ]
+  }
+
+  checkAttack(posFrom, simpleBoard) {
+    //if (simpleBoard[posFrom])
+    for (const delta of this.deltas) {
+      this.checkIfAttackable(posFrom, {row: delta[0], col: delta[1]}, simpleBoard);
+    }
+    return this.moveableSpaces;
+  }
+
+  checkIfAttackable (posFrom, delta, simpleBoard) {
+    // simpleBoard
+    // First check if applying 1 * delta has enemy
+    const spotFoe = {row: posFrom.row+delta.row, col: posFrom.col+delta.col};
+    const spotEmpty = {row: posFrom.row+delta.row*2, col: posFrom.col+delta.col*2};
+    if (simpleBoard[spotFoe.row] && simpleBoard[spotFoe.row][spotFoe.col] === foeSymbol &&
+    simpleBoard[spotEmpty.row] && simpleBoard[spotEmpty.row][spotEmpty.col] === null) {
+      // handle destorying enemy
+      this.moveableSpaces.push(spotEmpty);
+      return true;
+    }
+    return false;
   }
 
   getMoveableSpots(posFrom, board) {
+
+
     const simpleBoard = board.getSimplifiedBoard();
     // for checkers if king then going down.
     console.log('board', board);
-    const moveableSpaces = [];
+    this.moveableSpaces = [];
     // normal movement
-    const checkNormal = function (rowDelta, colDelta) {
+    const checkNormal = (rowDelta, colDelta) => {
       const row = posFrom.row + rowDelta;
       const col = posFrom.col + colDelta;
       if (simpleBoard[row] && simpleBoard[row][col] === null) {
-        moveableSpaces.push({row: row, col: col})
-      }
-    }
-    const deltas = [
-      [1, 1],
-      [1, -1],
-      // Illegal but just here for now
-    ].concat(this.king ? [
-      [-1, 1],
-      [-1, -1],
-    ] : []);
-    deltas.forEach(pair => checkNormal(pair[0], pair[1]));
-    console.log('moveableSpaces', moveableSpaces);
-
-    this.attackSpots = [];
-    const checkIfAttackable = (posFrom, delta) => {
-      // simpleBoard
-      // First check if applying 1 * delta has enemy
-      const spotFoe = {row: posFrom.row+delta.row, col: posFrom.col+delta.col};
-      const spotEmpty = {row: posFrom.row+delta.row*2, col: posFrom.col+delta.col*2};
-      if (simpleBoard[spotFoe.row] && simpleBoard[spotFoe.row][spotFoe.col] === foeSymbol &&
-      simpleBoard[spotEmpty.row] && simpleBoard[spotEmpty.row][spotEmpty.col] === null) {
-        this.attackSpots.push(spotFoe);
-        moveableSpaces.push(spotEmpty);
-        return true;
-      }
-
-      // Then check if applying 2 * delta has empty space
-      return false;
-    }
-    // attack movement
-    const checkAttack = function(posFrom) {
-      //if (simpleBoard[posFrom])
-      for (const delta of deltas) {
-        if (checkIfAttackable(posFrom, {row: delta[0], col: delta[1]})) {
-          checkAttack({row: posFrom.row+delta[0], col: posFrom.col+delta[1]});
-        }
+        this.moveableSpaces.push({row: row, col: col})
       }
     }
 
-    checkAttack(posFrom);
+    this.deltas.forEach(pair => checkNormal(pair[0], pair[1]));
+    console.log('moveableSpaces', this.moveableSpaces);
 
-    return moveableSpaces;
+    this.checkAttack(posFrom, simpleBoard);
+
+    return this.moveableSpaces;
   }
 
   checkIfMoveable(posFrom, posTo, board) {
@@ -181,8 +183,29 @@ class CheckerPiece extends BoardPiece {
     // logic for making someone a king.
     if (moveable && posTo.row === 7) {
       this.king = true;
+      this.deltas = this.deltas.concat([
+        [-1, 1],
+        [-1, -1],
+      ]);
       this.image = 'CheckerKingPiece.png';
     }
+
+    const simpleBoard = board.getSimplifiedBoard();
+    // check if you are attacking
+    board.activePiece = null;
+    //console.log('checkinnnnnnnnnnnnnnnnnnnnng', 'delta', posTo.row-posFrom.row, this.checkIfAttackable(posFrom, {row: posTo.row-posFrom.row, col: posTo.col-posFrom.col}, simpleBoard))
+    if (this.checkIfAttackable(posFrom, {row: (posTo.row-posFrom.row)/2, col: (posTo.col-posFrom.col)/2}, simpleBoard)) {
+      //alert('reeeeeeeeeee')
+      board.locations[posFrom.row + (posTo.row-posFrom.row)/2][posFrom.col + (posTo.col-posFrom.col)/2] = null;
+      this.moveableSpaces = [];
+      this.checkAttack(posTo, simpleBoard);
+      // check if you can attack again
+      if (this.moveableSpaces.length) {
+        //alert('this.that.this.data')
+        board.activePiece = posTo;
+      }
+    }
+
     return moveable;
   }
 }
@@ -196,8 +219,8 @@ class ChessPiece extends BoardPiece {
    * A move is considered valid if it would hit a foe or be an empty spot.
    */
    moveTargetIsValid(board, pos, moveType=['empty', 'attack']) {
-     console.log('checking if valid');
-     const simpleBoard = board.getSimplifiedBoard();
+    console.log('checking if valid');
+    const simpleBoard = board.getSimplifiedBoard();
     const [
       row,
       col
