@@ -133,7 +133,6 @@ class CheckerPiece extends BoardPiece {
       [1, 1],
       [1, -1],
       // Illegal but just here for now
-      [1, 0],
     ].concat(this.king ? [
       [-1, 1],
       [-1, -1],
@@ -158,15 +157,12 @@ class CheckerPiece extends BoardPiece {
       return false;
     }
     // attack movement
-    const checkAttack = function (posFrom) {
+    const checkAttack = function(posFrom) {
       //if (simpleBoard[posFrom])
-      const delta1 = {row: 1, col: -1};
-      const delta2 = {row: 1, col: 1};
-      if (checkIfAttackable(posFrom, delta1)) {
-        checkAttack({row: posFrom.row+delta1.row, col: posFrom.col+delta1.col});
-      }
-      if (checkIfAttackable(posFrom, delta2)) {
-        checkAttack({row: posFrom.row+delta1.row, col: posFrom.col+delta1.col});
+      for (const delta of deltas) {
+        if (checkIfAttackable(posFrom, {row: delta[0], col: delta[1]})) {
+          checkAttack({row: posFrom.row+delta[0], col: posFrom.col+delta[1]});
+        }
       }
     }
 
