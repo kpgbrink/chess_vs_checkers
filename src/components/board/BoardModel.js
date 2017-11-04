@@ -13,6 +13,7 @@ export default class BoardModel {
     this.pieceSelected = false;
     this.moveableSpaces = [];
     this.piecePos = null;
+    this.switchTurn = true;
     for (let row=0; row<8; row++) {
       const rowObj = this.locations[row] = [];
       for (let col=0; col<8; col++) {
@@ -72,7 +73,11 @@ export default class BoardModel {
         this.locations[row][col] = this.locations[this.piecePos.row][this.piecePos.col];
         this.locations[this.piecePos.row][this.piecePos.col] = null;
         // switch turn.
-        this.teamTurn = (this.teamTurn === 'checker' ? 'chess' : 'checker');
+        if (this.switchTurn) {
+          this.teamTurn = (this.teamTurn === 'checker' ? 'chess' : 'checker');
+        } else {
+          this.switchTurn = true;
+        }
         this.moveableSpaces = [];
         this.pieceSelected = null;
       }
