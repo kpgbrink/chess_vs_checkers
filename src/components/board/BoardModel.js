@@ -142,7 +142,7 @@ class CheckerPiece extends BoardPiece {
     console.log('moveableSpaces', moveableSpaces);
 
     this.attackSpots = [];
-    const checkIfAttackable = function(posFrom, delta) {
+    const checkIfAttackable = (posFrom, delta) => {
       // simpleBoard
       // First check if applying 1 * delta has enemy
       const spotFoe = {row: posFrom.row+delta.row, col: posFrom.col+delta.col};
@@ -153,6 +153,7 @@ class CheckerPiece extends BoardPiece {
         moveableSpaces.push(spotEmpty);
         return true;
       }
+
       // Then check if applying 2 * delta has empty space
       return false;
     }
@@ -168,6 +169,8 @@ class CheckerPiece extends BoardPiece {
         checkAttack({row: posFrom.row+delta1.row, col: posFrom.col+delta1.col});
       }
     }
+
+    checkAttack(posFrom);
 
     return moveableSpaces;
   }
