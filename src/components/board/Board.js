@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import BoardModel from './BoardModel';
 
 const styles = {
   board: {
@@ -30,30 +29,31 @@ const styles = {
 export default class Board extends Component {
   constructor(props) {
     super(props);
-    this.board = new BoardModel();
     this.state = {
-      board: this.board.getState(),
+      board: this.props.board.getState(),
       moveableSpaces: [],
     };
   }
 
-  getBoardState() {
+  componentWillReceiveProps(nextProps) {
+    console.log('reeeee');
+    this.getBoardState(nextProps.board);
+  }
+
+  getBoardState(board) {
     this.setState({
-      board: this.board.getState(),
-      moveableSpaces: this.board.getMoveableSpaces(),
+      board: board.getState(),
+      moveableSpaces: board.getMoveableSpaces(),
     });
   }
 
   handleCellClick(row, col) {
     console.log('cells clicked');
-    this.board.click(row, col);
-    this.getBoardState();
+    this.props.board.click(row, col);
+    this.getBoardState(this.props.board);
   }
 
   render() {
-    // const {
-    //   style
-    // } = this.props;
     const state = this.state;
     console.log(state.moveableSpaces.find(spot => 0 === spot.row && 1 === spot.col));
 

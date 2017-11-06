@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
+import logo from './logo.svg';
 import Board from './components/board/Board';
+import BoardModel from './components/board/BoardModel';
 import DeadZones from './components/board/DeadZones';
 import WhoseTurn from './components/board/WhoseTurn';
 import './App.css';
@@ -50,12 +52,15 @@ export default class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-
+      board: new BoardModel()
     };
   }
 
   newGame = () => {
     alert('I request a new game please');
+    this.setState({
+      board: new BoardModel()
+    });
   }
 
   render() {
@@ -68,7 +73,7 @@ export default class App extends Component {
         </header>
         <div style={styles.gameTable} className='Game-Table'>
           <DeadZones style={styles.DeadZones}/>
-          <Board style={styles.Board}/>
+          <Board style={styles.Board} board={this.state.board}/>
           <WhoseTurn style={styles.WhoseTurn}/>
         </div>
       </div>
