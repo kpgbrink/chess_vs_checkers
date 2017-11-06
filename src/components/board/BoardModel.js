@@ -60,7 +60,6 @@ export default class BoardModel {
     if (this.activePiece) {
       if (!this.moveableSpaces.find(space => space.row === row && space.col === col)) {
         return;
-        alert(`you can't do it`);
       }
     }
     console.log('current turn', this.teamTurn);
@@ -211,9 +210,9 @@ class CheckerPiece extends BoardPiece {
 }
 
 class ChessPiece extends BoardPiece {
-  constructor(team) {
-    super(team);
-  }
+  // constructor(team) {
+  //   super(team);
+  // }
 
   /**
    * A move is considered valid if it would hit a foe or be an empty spot.

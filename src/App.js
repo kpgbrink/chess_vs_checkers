@@ -1,9 +1,7 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
+// import logo from './logo.svg';
 import Board from './components/board/Board';
 import BoardModel from './components/board/BoardModel';
-import DeadZones from './components/board/DeadZones';
-import WhoseTurn from './components/board/WhoseTurn';
 import './App.css';
 
 const styles = {
@@ -19,7 +17,8 @@ const styles = {
   gameTable: {
     backgroundColor: '#341301',
     display: 'flex',
-    justifyContent: 'space-between',
+    alignItems: 'center',
+    justifyContent: 'center',
     height: '90%'
   },
   newGameButton: {
@@ -32,20 +31,8 @@ const styles = {
     height: '30vh',
     zIndex: '1000',
   },
-  DeadZones: {
-    fontSize: '4vh',
-    height: '90%',
-    widght: '50%',
-    margin: '10px',
-  },
   Board: {
-
   },
-  WhoseTurn: {
-    height: '90%',
-    width: '10%',
-    margin: '50px',
-  }
 };
 
 export default class App extends Component {
@@ -72,9 +59,7 @@ export default class App extends Component {
           <h1 className="App-title">Chess vs Checkers</h1>
         </header>
         <div style={styles.gameTable} className='Game-Table'>
-          <DeadZones style={styles.DeadZones}/>
           <Board style={styles.Board} board={this.state.board}/>
-          <WhoseTurn style={styles.WhoseTurn}/>
         </div>
       </div>
     );
