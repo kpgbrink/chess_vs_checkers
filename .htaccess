@@ -1,0 +1,8 @@
+RewriteEngine On
+RewriteBase /~kpgbrink/chess_vs_checkers/
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule .* build/ [L]
+
+DirectoryIndex build/index.html

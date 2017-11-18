@@ -1,5 +1,6 @@
 {
   "name": "chess_vs_checkers",
+  "homepage": "https://sam.ohnopub.net/~kpgbrink/chess_vs_checkers/",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
