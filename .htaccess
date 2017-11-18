@@ -3,6 +3,6 @@ RewriteBase /~kpgbrink/chess_vs_checkers/
 
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule .* build/ [L]
+RewriteRule .* build/$0 [L]
 
 DirectoryIndex build/index.html
