@@ -1,2 +1,1 @@
 Chess vs Checkers
- Test
